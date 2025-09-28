@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     # Supabase Configuration
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     SUPABASE_DB_URL: str = os.getenv("SUPABASE_DB_URL", "")
     
     # Fallback to individual components if SUPABASE_DB_URL not provided

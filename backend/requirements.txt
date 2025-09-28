@@ -9,6 +9,7 @@ psycopg2-binary==2.9.9
 
 # --- Supabase ---
 supabase==2.3.0
+gotrue==2.4.2
 
 # --- Auth & Security ---
 python-jose==3.3.0

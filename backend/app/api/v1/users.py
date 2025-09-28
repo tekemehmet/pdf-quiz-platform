@@ -37,11 +37,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         sub = payload.get("sub")
         if sub is None:
             raise credentials_exception
-        user_id = int(sub)
-    except (JWTError, ValueError):
+        user_id = sub  # Keep as string since we're using UUIDs
+    except JWTError:
         raise credentials_exception
 
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(models.User.id == str(user_id)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, Integer, Enum, DateTime, func, Text, Boolean, ForeignKey, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 import enum
 
 Base = declarative_base()
@@ -12,7 +14,7 @@ class RoleEnum(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -23,12 +25,12 @@ class User(Base):
 class Quiz(Base):
     __tablename__ = "quizzes"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     title = Column(String, nullable=False)
     file_name = Column(String, nullable=False)
-    question_type = Column(Enum('multiple-choice', 'open-ended'), nullable=False)
+    question_type = Column(String, nullable=False)  # 'multiple-choice' or 'open-ended'
     questions = Column(JSON, nullable=False)  # Store questions as JSON
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_published = Column(Boolean, default=True)
 
@@ -39,9 +41,9 @@ class Quiz(Base):
 class QuizResult(Base):
     __tablename__ = "quiz_results"
 
-    id = Column(Integer, primary_key=True, index=True)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    quiz_id = Column(UUID(as_uuid=True), ForeignKey("quizzes.id"), nullable=False)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     student_name = Column(String, nullable=False)
     student_number = Column(String, nullable=False)
     answers = Column(JSON, nullable=False)  # Store answers as JSON

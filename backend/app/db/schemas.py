@@ -1,7 +1,8 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
+import uuid
 
 class RoleEnum(str, Enum):
     teacher = "teacher"
