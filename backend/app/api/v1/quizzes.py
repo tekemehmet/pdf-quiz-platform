@@ -57,7 +57,7 @@ def list_my_quizzes(
     return quizzes
 
 @router.get("/{quiz_id}", response_model=schemas.QuizOut)
-def get_quiz(quiz_id: int, db: Session = Depends(get_db)):
+def get_quiz(quiz_id: str, db: Session = Depends(get_db)):
     quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
@@ -65,7 +65,7 @@ def get_quiz(quiz_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_quiz(
-    quiz_id: int,
+    quiz_id: str,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):

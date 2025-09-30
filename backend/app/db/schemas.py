@@ -23,19 +23,19 @@ class UserCreate(UserBase):
     student_number: str | None = None
 
 class UserOut(UserBase):
-    id: int
+    id: str
     student_number: str | None
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
 class TokenData(BaseModel):
-    id: int | None = None
+    id: str | None = None
     role: RoleEnum | None = None
 
 # Question Schemas
@@ -66,17 +66,17 @@ class QuizCreate(QuizBase):
     pass
 
 class QuizOut(QuizBase):
-    id: int
-    created_by: int
+    id: str
+    created_by: str
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Quiz Result Schemas
 class QuizResultBase(BaseModel):
-    quiz_id: int
-    student_id: int
+    quiz_id: str
+    student_id: str
     student_name: str
     student_number: str
     answers: List[Answer]
@@ -88,11 +88,11 @@ class QuizResultCreate(QuizResultBase):
     pass
 
 class QuizResultOut(QuizResultBase):
-    id: int
+    id: str
     completed_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # PDF Upload Schema
 class PDFUploadResponse(BaseModel):

@@ -69,7 +69,7 @@ def get_my_results(
 
 @router.get("/quiz/{quiz_id}", response_model=List[schemas.QuizResultOut])
 def get_quiz_results(
-    quiz_id: int,
+    quiz_id: str,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):

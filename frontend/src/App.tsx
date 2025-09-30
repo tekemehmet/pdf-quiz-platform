@@ -1,85 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentDashboard from './components/StudentDashboard';
-import { User, Quiz, QuizResult } from './types/user';
-import { Question } from './types/quiz';
+import { apiClient } from './lib/api';
+import { QuizProvider } from './lib/QuizContext';
 
-type AppState = 'login' | 'teacher' | 'student';
+type AppState = 'login' | 'teacher' | 'student' | 'loading';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  type: 'teacher' | 'student';
+  studentNumber?: string;
+}
 
 function App() {
-  const [appState, setAppState] = useState<AppState>('login');
+  const [appState, setAppState] = useState<AppState>('loading');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [publishedQuizzes, setPublishedQuizzes] = useState<Quiz[]>([]);
-  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
 
-  const handleLogin = (userData: { name: string; email: string; type: 'teacher' | 'student'; studentNumber?: string }) => {
+  useEffect(() => {
+    const token = apiClient.getToken();
+    if (token) {
+      apiClient.getCurrentUser()
+        .then(userData => {
+          setCurrentUser({
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            type: userData.role,
+            studentNumber: userData.student_number,
+          });
+          setAppState(userData.role);
+        })
+        .catch(() => {
+          apiClient.clearToken();
+          setAppState('login');
+        });
+    } else {
+      setAppState('login');
+    }
+  }, []);
+
+  const handleLogin = (userData: { id: string; name: string; email: string; type: 'teacher' | 'student'; studentNumber?: string; token: string }) => {
+    apiClient.setToken(userData.token);
+
     const user: User = {
-      id: Date.now().toString(),
+      id: userData.id,
       name: userData.name,
       email: userData.email,
       type: userData.type,
       studentNumber: userData.studentNumber
     };
-    
+
     setCurrentUser(user);
     setAppState(userData.type);
   };
 
   const handleLogout = () => {
+    apiClient.clearToken();
     setCurrentUser(null);
     setAppState('login');
   };
 
-  const handlePublishQuiz = (quizData: Omit<Quiz, 'id' | 'createdAt'>) => {
-    const quiz: Quiz = {
-      ...quizData,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
-    
-    setPublishedQuizzes(prev => [...prev, quiz]);
-  };
-
-  const handleSubmitQuizResult = (resultData: Omit<QuizResult, 'id'>) => {
-    const result: QuizResult = {
-      ...resultData,
-      id: Date.now().toString()
-    };
-    
-    setQuizResults(prev => [...prev, result]);
-  };
-
-  const getStudentResults = (studentId: string) => {
-    return quizResults.filter(result => result.studentId === studentId);
-  };
+  if (appState === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {appState === 'login' && (
-        <Login onLogin={handleLogin} />
-      )}
-      
-      {appState === 'teacher' && currentUser && (
-        <TeacherDashboard
-          user={currentUser}
-          onLogout={handleLogout}
-          publishedQuizzes={publishedQuizzes}
-          quizResults={quizResults}
-          onPublishQuiz={handlePublishQuiz}
-        />
-      )}
-      
-      {appState === 'student' && currentUser && (
-        <StudentDashboard
-          user={currentUser}
-          onLogout={handleLogout}
-          availableQuizzes={publishedQuizzes}
-          onSubmitQuizResult={handleSubmitQuizResult}
-          studentResults={getStudentResults(currentUser.id)}
-        />
-      )}
-    </div>
+    <QuizProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        {appState === 'login' && (
+          <Login onLogin={handleLogin} />
+        )}
+
+        {appState === 'teacher' && currentUser && (
+          <TeacherDashboard
+            user={currentUser}
+            onLogout={handleLogout}
+          />
+        )}
+
+        {appState === 'student' && currentUser && (
+          <StudentDashboard
+            user={currentUser}
+            onLogout={handleLogout}
+          />
+        )}
+      </div>
+    </QuizProvider>
   );
 }
 
