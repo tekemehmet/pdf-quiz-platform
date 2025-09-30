@@ -1,6 +1,6 @@
 @@ .. @@
  import React, { useState, useCallback } from 'react';
- import { Upload, FileText, Loader, CheckCircle2, Edit3 } from 'lucide-react';
+ import { Upload, FileText, Loader, CircleCheck as CheckCircle2, CreditCard as Edit3 } from 'lucide-react';
  import { Question } from '../types/quiz';
 -import { generateQuestionsFromPDF } from '../utils/questionGenerator';
 +import { apiClient } from '../lib/api';
@@ -27,3 +27,5 @@
      } finally {
        setIsProcessing(false);
      }
+
+export default React
