@@ -3,7 +3,7 @@ import Login from './components/Login';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import { apiClient } from './lib/api';
-import { QuizProvider } from './lib/QuizContext';
+import { QuizProvider, useQuiz } from './lib/QuizContext';
 
 type AppState = 'login' | 'teacher' | 'student' | 'loading';
 
@@ -15,9 +15,10 @@ interface User {
   studentNumber?: string;
 }
 
-function App() {
+function AppContent() {
   const [appState, setAppState] = useState<AppState>('loading');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { quizzes, results, createQuiz, submitResult } = useQuiz();
 
   useEffect(() => {
     const token = apiClient.getToken();
@@ -74,27 +75,42 @@ function App() {
     );
   }
 
+  const teacherQuizzes = quizzes.filter(quiz => quiz.createdBy === currentUser?.id);
+  const studentResults = results.filter(result => result.studentId === currentUser?.id);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      {appState === 'login' && (
+        <Login onLogin={handleLogin} />
+      )}
+
+      {appState === 'teacher' && currentUser && (
+        <TeacherDashboard
+          user={currentUser}
+          onLogout={handleLogout}
+          publishedQuizzes={teacherQuizzes}
+          quizResults={results}
+          onPublishQuiz={createQuiz}
+        />
+      )}
+
+      {appState === 'student' && currentUser && (
+        <StudentDashboard
+          user={currentUser}
+          onLogout={handleLogout}
+          availableQuizzes={quizzes}
+          onSubmitQuizResult={submitResult}
+          studentResults={studentResults}
+        />
+      )}
+    </div>
+  );
+}
+
+function App() {
   return (
     <QuizProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-        {appState === 'login' && (
-          <Login onLogin={handleLogin} />
-        )}
-
-        {appState === 'teacher' && currentUser && (
-          <TeacherDashboard
-            user={currentUser}
-            onLogout={handleLogout}
-          />
-        )}
-
-        {appState === 'student' && currentUser && (
-          <StudentDashboard
-            user={currentUser}
-            onLogout={handleLogout}
-          />
-        )}
-      </div>
+      <AppContent />
     </QuizProvider>
   );
 }
