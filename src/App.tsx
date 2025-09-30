@@ -95,8 +95,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <Login onLogin={handleLogin} />
+      {appState === 'login' && (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+          <Login onLogin={handleLogin} />
+        </div>
       )}
       
       {appState === 'teacher' && currentUser && (
@@ -121,3 +123,5 @@ function App() {
     </div>
   );
 }
+
+export default App;
